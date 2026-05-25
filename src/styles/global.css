@@ -1,0 +1,44 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  color: #ffffff;
+  background: #000000;
+  font-family: "Courier New", Courier, monospace;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+html,
+body {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+  background: #000000;
+}
+
+body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+#app {
+  width: min(100vw, 720px);
+  height: min(100vw, 720px);
+  display: grid;
+  place-items: center;
+  background: #000000;
+}
+
+canvas {
+  width: min(100vw, 720px);
+  height: min(100vw, 720px);
+  display: block;
+  background: #000000;
+  image-rendering: pixelated;
+  outline: none;
+}
