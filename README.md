@@ -4,6 +4,9 @@
 
 ## Play
 
+- GitHub: https://github.com/amuldi/SpaceRocketGame_Hackathon
+- Deploy: https://space-rocket-game-smoky.vercel.app
+
 - 이동: 방향키 또는 WASD
 - 시작 / 재시작: Space 또는 Enter
 - 일시정지: P 또는 Esc

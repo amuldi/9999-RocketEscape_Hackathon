@@ -26,3 +26,4 @@ src/game/engine/
 src/game/entities/
 src/game/render/
 src/game/systems/
+.vercel
