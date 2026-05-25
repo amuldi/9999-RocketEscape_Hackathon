@@ -1,5 +1,5 @@
-import { Game } from './game/Game';
-import { CANVAS_SIZE } from './game/types';
+import { Game } from './game/core/Game';
+import { CANVAS_SIZE } from './game/core/types';
 import './styles/global.css';
 
 const app = document.querySelector<HTMLElement>('#app');
@@ -12,7 +12,7 @@ const canvas = document.createElement('canvas');
 canvas.width = CANVAS_SIZE;
 canvas.height = CANVAS_SIZE;
 canvas.tabIndex = 0;
-canvas.setAttribute('aria-label', 'Space Rocket Game board');
+canvas.setAttribute('aria-label', '9999: Rocket Escape board');
 canvas.setAttribute('role', 'img');
 
 app.append(canvas);

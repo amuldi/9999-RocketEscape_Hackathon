@@ -1,4 +1,4 @@
-import { BOARD } from '../game/types';
+import { BOARD } from '../game/core/types';
 
 export function drawHUD(ctx: CanvasRenderingContext2D, score: number, lives: number): void {
   ctx.save();

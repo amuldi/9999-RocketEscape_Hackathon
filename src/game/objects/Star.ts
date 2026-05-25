@@ -1,5 +1,5 @@
-import { circleIntersectsCircle, distance } from './Collision';
-import { BOARD, type Vector } from './types';
+import { circleIntersectsCircle, distance } from '../core/Collision';
+import { BOARD, type Vector } from '../core/types';
 
 export class Star {
   readonly radius = 12;

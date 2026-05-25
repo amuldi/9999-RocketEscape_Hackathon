@@ -1,8 +1,8 @@
-import { BOARD, CANVAS_SIZE, TARGET_SCORE } from '../game/types';
+import { BOARD, CANVAS_SIZE, TARGET_SCORE } from '../game/core/types';
 
 export function drawStartScreen(ctx: CanvasRenderingContext2D): void {
   drawOverlay(ctx);
-  drawTitle(ctx, 'SPACE ROCKET GAME', 218);
+  drawTitle(ctx, '9999: ROCKET ESCAPE', 218);
   drawLine(ctx, 'ARROW KEYS / WASD  MOVE', 292, 18);
   drawLine(ctx, 'EAT ONE STAR AT A TIME', 326, 18);
   drawLine(ctx, 'AVOID WALLS, DEBRIS, ASTEROIDS', 360, 18);

@@ -1,4 +1,4 @@
-import { BOARD, type Vector } from './types';
+import { BOARD, type Vector } from '../core/types';
 
 type BackgroundStar = Vector & {
   radius: number;
@@ -16,11 +16,21 @@ type Meteor = {
   kind: MeteorKind;
 };
 
+type SpeedLine = {
+  position: Vector;
+  velocity: Vector;
+  length: number;
+  alpha: number;
+  width: number;
+};
+
 export class Background {
   private readonly stars: BackgroundStar[];
   private meteors: Meteor[] = [];
+  private speedLines: SpeedLine[] = [];
   private dangerMeteorTimer = 12 + Math.random() * 12;
   private healMeteorTimer = 28 + Math.random() * 26;
+  private speedLineTimer = 0;
 
   constructor() {
     this.stars = Array.from({ length: 100 }, () => ({
@@ -34,6 +44,7 @@ export class Background {
   update(deltaTime: number, meteorSpeed: number): void {
     this.dangerMeteorTimer -= deltaTime;
     this.healMeteorTimer -= deltaTime;
+    this.updateSpeedLines(deltaTime, meteorSpeed);
 
     if (this.dangerMeteorTimer <= 0) {
       this.spawnMeteor('danger', meteorSpeed);
@@ -68,6 +79,10 @@ export class Background {
 
     ctx.globalAlpha = 1;
     ctx.strokeStyle = '#ffffff';
+
+    for (const speedLine of this.speedLines) {
+      this.drawSpeedLine(ctx, speedLine);
+    }
 
     for (const meteor of this.meteors) {
       this.drawMeteor(ctx, meteor);
@@ -123,6 +138,60 @@ export class Background {
     });
   }
 
+  private updateSpeedLines(deltaTime: number, speedReference: number): void {
+    const pressure = Math.min(1.9, Math.max(0.55, speedReference / 520));
+    this.speedLineTimer += deltaTime * (4 + pressure * 4.6);
+
+    while (this.speedLineTimer >= 1) {
+      this.speedLines.push(this.createSpeedLine(speedReference, pressure));
+      this.speedLineTimer -= 1;
+    }
+
+    for (const speedLine of this.speedLines) {
+      speedLine.position.x += speedLine.velocity.x * deltaTime;
+      speedLine.position.y += speedLine.velocity.y * deltaTime;
+    }
+
+    this.speedLines = this.speedLines.filter((speedLine) => this.isSpeedLineInside(speedLine));
+  }
+
+  private createSpeedLine(speedReference: number, pressure: number): SpeedLine {
+    const direction = normalize(Math.random() < 0.5 ? { x: -1, y: 1 } : { x: 1, y: 1 });
+    const speed = speedReference * (0.72 + Math.random() * 0.28) + 150;
+
+    return {
+      position: {
+        x: BOARD.x + Math.random() * BOARD.width,
+        y: BOARD.y + Math.random() * BOARD.height,
+      },
+      velocity: {
+        x: direction.x * speed,
+        y: direction.y * speed,
+      },
+      length: 24 + pressure * 34 + Math.random() * 28,
+      alpha: 0.16 + Math.random() * 0.22,
+      width: 1 + Math.random() * 0.7,
+    };
+  }
+
+  private drawSpeedLine(ctx: CanvasRenderingContext2D, speedLine: SpeedLine): void {
+    const direction = normalize(speedLine.velocity);
+    const tail = {
+      x: speedLine.position.x - direction.x * speedLine.length,
+      y: speedLine.position.y - direction.y * speedLine.length,
+    };
+
+    ctx.save();
+    ctx.globalAlpha = speedLine.alpha;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = speedLine.width;
+    ctx.beginPath();
+    ctx.moveTo(speedLine.position.x, speedLine.position.y);
+    ctx.lineTo(tail.x, tail.y);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   private drawMeteor(ctx: CanvasRenderingContext2D, meteor: Meteor): void {
     const tail = {
       x: meteor.position.x - meteor.velocity.x * 0.005 * meteor.length,
@@ -167,6 +236,17 @@ export class Background {
       meteor.position.x < BOARD.x + BOARD.width + margin &&
       meteor.position.y > BOARD.y - margin &&
       meteor.position.y < BOARD.y + BOARD.height + margin
+    );
+  }
+
+  private isSpeedLineInside(speedLine: SpeedLine): boolean {
+    const margin = speedLine.length + 12;
+
+    return (
+      speedLine.position.x > BOARD.x - margin &&
+      speedLine.position.x < BOARD.x + BOARD.width + margin &&
+      speedLine.position.y > BOARD.y - margin &&
+      speedLine.position.y < BOARD.y + BOARD.height + margin
     );
   }
 

@@ -1,5 +1,5 @@
-import { normalize } from './Collision';
-import type { Vector } from './types';
+import { normalize } from '../core/Collision';
+import type { Vector } from '../core/types';
 
 export class Particle {
   private age = 0;
@@ -14,8 +14,8 @@ export class Particle {
   static flame(origin: Vector, direction: Vector): Particle {
     const backward = normalize({ x: -direction.x, y: -direction.y });
     const side = { x: -direction.y, y: direction.x };
-    const drift = (Math.random() - 0.5) * 34;
-    const speed = 70 + Math.random() * 88;
+    const drift = (Math.random() - 0.5) * 46;
+    const speed = 125 + Math.random() * 140;
 
     return new Particle(
       {
@@ -26,8 +26,8 @@ export class Particle {
         x: backward.x * speed + side.x * drift,
         y: backward.y * speed + side.y * drift,
       },
-      0.24 + Math.random() * 0.2,
-      2 + Math.random() * 4,
+      0.18 + Math.random() * 0.18,
+      3 + Math.random() * 4.5,
     );
   }
 

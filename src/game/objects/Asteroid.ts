@@ -1,5 +1,5 @@
-import { circleIntersectsCircle, normalize } from './Collision';
-import { BOARD, type Vector } from './types';
+import { circleIntersectsCircle, normalize } from '../core/Collision';
+import { BOARD, type Vector } from '../core/types';
 
 type SpawnSide = 'left' | 'right' | 'top' | 'bottom';
 

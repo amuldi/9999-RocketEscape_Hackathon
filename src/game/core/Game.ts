@@ -1,14 +1,14 @@
-import { Asteroid } from './Asteroid';
-import { Background } from './Background';
+import { Asteroid } from '../objects/Asteroid';
+import { Background } from '../effects/Background';
 import { isCircleOutsideRect } from './Collision';
 import { getDifficulty, randomDebrisBurst } from './Difficulty';
 import { Input } from './Input';
-import { Obstacle } from './Obstacle';
-import { Particle } from './Particle';
-import { Player } from './Player';
-import { Star } from './Star';
-import { drawHUD } from '../ui/HUD';
-import { drawEndScreen, drawGameOverScreen, drawPauseScreen, drawStartScreen } from '../ui/screens';
+import { Obstacle } from '../objects/Obstacle';
+import { Particle } from '../effects/Particle';
+import { Player } from '../objects/Player';
+import { Star } from '../objects/Star';
+import { drawHUD } from '../../ui/HUD';
+import { drawEndScreen, drawGameOverScreen, drawPauseScreen, drawStartScreen } from '../../ui/screens';
 import { BOARD, CANVAS_SIZE, INITIAL_LIVES, TARGET_SCORE, type GameState } from './types';
 
 export class Game {
@@ -72,7 +72,8 @@ export class Game {
     }
 
     const difficulty = getDifficulty(this.score);
-    this.background.update(deltaTime, difficulty.debrisSpeed + 42);
+    const fastestObstacleSpeed = Math.max(difficulty.debrisSpeed, difficulty.asteroidSpeed);
+    this.background.update(deltaTime, fastestObstacleSpeed + 150);
 
     if (this.state !== 'playing') {
       return;
@@ -191,10 +192,11 @@ export class Game {
 
   private emitFlame(deltaTime: number): void {
     this.flameTimer += deltaTime;
+    const interval = Math.max(0.012, 0.022 - this.score * 0.00002);
 
-    while (this.flameTimer >= 0.025) {
+    while (this.flameTimer >= interval) {
       this.particles.push(Particle.flame(this.player.getFlameOrigin(), this.player.direction));
-      this.flameTimer -= 0.025;
+      this.flameTimer -= interval;
     }
   }
 
@@ -209,7 +211,7 @@ export class Game {
     const burstCount = randomDebrisBurst(maxBurst);
 
     for (let i = 0; i < burstCount; i += 1) {
-      this.obstacles.push(Obstacle.spawn(speed + Math.random() * 32));
+      this.obstacles.push(Obstacle.spawn(speed + Math.random() * 70));
     }
   }
 
@@ -226,7 +228,7 @@ export class Game {
 
     this.asteroidTimer = 0;
     if (Math.random() <= chance) {
-      this.asteroids.push(Asteroid.spawn(speed + Math.random() * 45, this.player.position));
+      this.asteroids.push(Asteroid.spawn(speed + Math.random() * 85, this.player.position));
     }
   }
 

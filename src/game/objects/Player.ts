@@ -1,10 +1,10 @@
-import { clamp, normalize } from './Collision';
-import { BOARD, INVULNERABLE_SECONDS, type Rect, type Vector } from './types';
+import { clamp, normalize } from '../core/Collision';
+import { BOARD, INVULNERABLE_SECONDS, type Rect, type Vector } from '../core/types';
 
 export class Player {
   readonly radius = 17;
   readonly width = 44;
-  readonly baseSpeed = 200;
+  readonly baseSpeed = 235;
 
   position: Vector = { x: 0, y: 0 };
   direction: Vector = { x: 1, y: 0 };
@@ -45,8 +45,8 @@ export class Player {
   }
 
   private getSpeed(score: number): number {
-    // Star collection now has a stronger speed ramp, with a cap for playability.
-    return this.baseSpeed + Math.min(300, score * 1.15);
+    // Star collection raises player speed in step with the faster obstacle field.
+    return this.baseSpeed + Math.min(560, score * 2.5);
   }
 
   makeInvulnerable(): void {
