@@ -6,7 +6,8 @@ type RankingEntry = RunResult & {
   createdAt: string;
 };
 
-const RANKING_KEY = '9999-rocket-escape:defense-ranking';
+const RANKING_KEY = '9999-rocket-escape:local-ranking';
+const LEGACY_RANKING_KEY = '9999-rocket-escape:defense-ranking';
 const NAME_KEY = '9999-rocket-escape:last-name';
 const MAX_RANKING_ENTRIES = 10;
 
@@ -67,17 +68,17 @@ export function createGameMenu(root: HTMLElement, game: Game): GameMenu {
   overlay.append(panel);
   root.append(overlay);
 
-  function startDefenseRun(): void {
+  function startRun(): void {
     const playerName = sanitizeName(input.value);
     input.value = playerName;
     localStorage.setItem(NAME_KEY, playerName);
     hideRanking();
     overlay.classList.add('is-hidden');
     game.setMenuOpen(false);
-    game.beginDefenseRun(playerName);
+    game.beginRun(playerName);
   }
 
-  startButton.addEventListener('click', startDefenseRun);
+  startButton.addEventListener('click', startRun);
   leaderboardButton.addEventListener('click', () => {
     if (rankingSection.classList.contains('is-hidden')) {
       renderRanking(rankingList);
@@ -90,7 +91,7 @@ export function createGameMenu(root: HTMLElement, game: Game): GameMenu {
   input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
-      startDefenseRun();
+      startRun();
     }
   });
 
@@ -148,7 +149,8 @@ function saveRanking(result: RunResult): RankingEntry[] {
 
 function loadRanking(): RankingEntry[] {
   try {
-    const parsed = JSON.parse(localStorage.getItem(RANKING_KEY) ?? '[]');
+    const stored = localStorage.getItem(RANKING_KEY) ?? localStorage.getItem(LEGACY_RANKING_KEY) ?? '[]';
+    const parsed = JSON.parse(stored);
     return Array.isArray(parsed) ? parsed.filter(isRankingEntry) : [];
   } catch {
     return [];

@@ -9,7 +9,7 @@ import { Player } from '../objects/Player';
 import { Star } from '../objects/Star';
 import { drawHUD } from '../../ui/HUD';
 import { drawEndScreen, drawGameOverScreen, drawPauseScreen, drawStartScreen } from '../../ui/screens';
-import { BOARD, CANVAS_SIZE, INITIAL_LIVES, TARGET_SCORE, type GameMode, type GameState, type RunResult } from './types';
+import { BOARD, CANVAS_SIZE, INITIAL_LIVES, TARGET_SCORE, type GameState, type RunResult } from './types';
 
 type GameOptions = {
   onRunEnd?: (result: RunResult) => void;
@@ -28,7 +28,6 @@ export class Game {
 
   private state: GameState = 'start';
   private playerName = 'PLAYER';
-  private mode: GameMode = 'defense';
   private score = 0;
   private starsCollected = 0;
   private combo = 0;
@@ -67,9 +66,8 @@ export class Game {
     this.input.destroy();
   }
 
-  beginDefenseRun(playerName: string): void {
+  beginRun(playerName: string): void {
     this.playerName = playerName.trim() || 'PLAYER';
-    this.mode = 'defense';
     this.menuOpen = false;
     this.resetRun();
     this.state = 'playing';
@@ -390,7 +388,6 @@ export class Game {
     this.runReported = true;
     this.options.onRunEnd?.({
       playerName: this.playerName,
-      mode: this.mode,
       score: this.score,
       starsCollected: this.starsCollected,
       survivalSeconds: this.survivalSeconds,

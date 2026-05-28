@@ -10,7 +10,7 @@ export function drawHUD(ctx: CanvasRenderingContext2D, score: number, lives: num
   ctx.fillText(`SCORE: ${score.toString().padStart(5, '0')}`, BOARD.x + 18, BOARD.y + 24);
 
   ctx.textAlign = 'center';
-  ctx.fillText(`${playerName.toUpperCase()}  DEFENSE  COMBO:${combo}`, BOARD.x + BOARD.width / 2, BOARD.y + 24);
+  ctx.fillText(`${playerName.toUpperCase()}  COMBO:${combo}`, BOARD.x + BOARD.width / 2, BOARD.y + 24);
 
   ctx.textAlign = 'right';
   ctx.fillText(`LIFE: ${formatLife(lives)}`, BOARD.x + BOARD.width - 18, BOARD.y + 24);
