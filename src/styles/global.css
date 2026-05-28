@@ -92,8 +92,8 @@ canvas {
 }
 
 .nickname-input,
-.mode-button,
-.start-button {
+.start-button,
+.leaderboard-button {
   width: 100%;
   border: 1px solid #ffffff;
   border-radius: 0;
@@ -109,19 +109,19 @@ canvas {
 }
 
 .nickname-input:focus,
-.mode-button:focus,
-.start-button:focus {
+.start-button:focus,
+.leaderboard-button:focus {
   box-shadow: 0 0 0 2px #ffffff;
 }
 
-.mode-button,
-.start-button {
+.start-button,
+.leaderboard-button {
   height: 44px;
   margin-top: 12px;
   cursor: pointer;
 }
 
-.mode-button.is-selected {
+.leaderboard-button {
   background: #ffffff;
   color: #000000;
 }
@@ -130,11 +130,8 @@ canvas {
   font-weight: 700;
 }
 
-.result-line {
-  min-height: 22px;
-  margin-top: 16px;
-  color: #f1f1f1;
-  font-size: 13px;
+.ranking-section.is-hidden {
+  display: none;
 }
 
 .menu-panel h2 {

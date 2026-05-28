@@ -27,7 +27,7 @@ export function createGameMenu(root: HTMLElement, game: Game): GameMenu {
 
   const intro = document.createElement('p');
   intro.className = 'menu-copy';
-  intro.textContent = '닉네임을 정하고 Defense Mode로 시작하세요. 점수는 별 획득, 생존 시간, 콤보로 계산됩니다.';
+  intro.textContent = '닉네임을 정하고 바로 시작하세요. 점수는 별 획득, 생존 시간, 콤보로 계산됩니다.';
 
   const label = document.createElement('label');
   label.className = 'field-label';
@@ -42,20 +42,19 @@ export function createGameMenu(root: HTMLElement, game: Game): GameMenu {
   input.spellcheck = false;
   label.append(input);
 
-  const mode = document.createElement('button');
-  mode.className = 'mode-button is-selected';
-  mode.type = 'button';
-  mode.textContent = 'DEFENSE MODE';
-  mode.setAttribute('aria-pressed', 'true');
-
   const startButton = document.createElement('button');
   startButton.className = 'start-button';
   startButton.type = 'button';
-  startButton.textContent = 'START DEFENSE';
+  startButton.textContent = 'START';
 
-  const result = document.createElement('p');
-  result.className = 'result-line';
-  result.textContent = '별을 빠르게 먹고 장애물을 피해서 랭킹에 도전하세요.';
+  const leaderboardButton = document.createElement('button');
+  leaderboardButton.className = 'leaderboard-button';
+  leaderboardButton.type = 'button';
+  leaderboardButton.textContent = 'LEADERBOARD';
+  leaderboardButton.setAttribute('aria-expanded', 'false');
+
+  const rankingSection = document.createElement('div');
+  rankingSection.className = 'ranking-section is-hidden';
 
   const rankingTitle = document.createElement('h2');
   rankingTitle.textContent = 'LOCAL RANKING';
@@ -63,7 +62,8 @@ export function createGameMenu(root: HTMLElement, game: Game): GameMenu {
   const rankingList = document.createElement('ol');
   rankingList.className = 'ranking-list';
 
-  panel.append(title, intro, label, mode, startButton, result, rankingTitle, rankingList);
+  rankingSection.append(rankingTitle, rankingList);
+  panel.append(title, intro, label, startButton, leaderboardButton, rankingSection);
   overlay.append(panel);
   root.append(overlay);
 
@@ -71,13 +71,22 @@ export function createGameMenu(root: HTMLElement, game: Game): GameMenu {
     const playerName = sanitizeName(input.value);
     input.value = playerName;
     localStorage.setItem(NAME_KEY, playerName);
-    result.textContent = 'RUNNING DEFENSE MODE';
+    hideRanking();
     overlay.classList.add('is-hidden');
     game.setMenuOpen(false);
     game.beginDefenseRun(playerName);
   }
 
   startButton.addEventListener('click', startDefenseRun);
+  leaderboardButton.addEventListener('click', () => {
+    if (rankingSection.classList.contains('is-hidden')) {
+      renderRanking(rankingList);
+      showRanking();
+      return;
+    }
+
+    hideRanking();
+  });
   input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -91,17 +100,23 @@ export function createGameMenu(root: HTMLElement, game: Game): GameMenu {
   return {
     showResult(runResult: RunResult): void {
       const saved = saveRanking(runResult);
-      const rank = saved.findIndex((entry) => entry.id === runResultId(runResult)) + 1;
-      const rankText = rank > 0 ? `#${rank}` : 'OUT OF TOP 10';
-
-      result.textContent = `${runResult.playerName}  SCORE ${runResult.score}  ${rankText}`;
-      startButton.textContent = 'RETRY DEFENSE';
       renderRanking(rankingList, saved);
+      hideRanking();
       game.setMenuOpen(true);
       overlay.classList.remove('is-hidden');
       startButton.focus();
     },
   };
+
+  function showRanking(): void {
+    rankingSection.classList.remove('is-hidden');
+    leaderboardButton.setAttribute('aria-expanded', 'true');
+  }
+
+  function hideRanking(): void {
+    rankingSection.classList.add('is-hidden');
+    leaderboardButton.setAttribute('aria-expanded', 'false');
+  }
 }
 
 function sanitizeName(value: string): string {

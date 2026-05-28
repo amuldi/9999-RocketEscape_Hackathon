@@ -4,9 +4,9 @@ export function drawStartScreen(ctx: CanvasRenderingContext2D): void {
   drawOverlay(ctx);
   drawTitle(ctx, '9999: ROCKET ESCAPE', 218);
   drawLine(ctx, 'ENTER NICKNAME', 292, 18);
-  drawLine(ctx, 'SELECT DEFENSE MODE', 326, 18);
-  drawLine(ctx, 'LOCAL RANKING SAVES AFTER RUN', 360, 18);
-  drawLine(ctx, 'USE THE PANEL TO START', 428, 18);
+  drawLine(ctx, 'PRESS START TO PLAY', 326, 18);
+  drawLine(ctx, 'LEADERBOARD SAVES LOCALLY', 360, 18);
+  drawLine(ctx, 'USE LEADERBOARD TO SEE RANKS', 428, 18);
   drawLine(ctx, 'ARROW KEYS / WASD TO MOVE', 462, 14);
 }
 

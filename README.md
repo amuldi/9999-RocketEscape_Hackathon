@@ -9,7 +9,8 @@
 - Plan PDF: https://space-rocket-game-smoky.vercel.app/docs/9999-rocket-escape-plan.pdf
 
 - 이동: 방향키 또는 WASD
-- 닉네임 입력 후 `DEFENSE MODE` 시작
+- 닉네임 입력 후 `START`
+- 순위 확인: `LEADERBOARD`
 - 일시정지: P 또는 Esc
 
 ## Rules
