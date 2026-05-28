@@ -1,4 +1,5 @@
 import { Asteroid } from '../objects/Asteroid';
+import { AudioManager } from '../audio/AudioManager';
 import { Background } from '../effects/Background';
 import { isCircleOutsideRect } from './Collision';
 import { getDifficulty, randomDebrisBurst } from './Difficulty';
@@ -20,6 +21,7 @@ export class Game {
   private readonly input = new Input();
   private readonly player = new Player();
   private readonly background = new Background();
+  private readonly audio = new AudioManager();
 
   private star = new Star(this.player.position);
   private obstacles: Obstacle[] = [];
@@ -64,9 +66,11 @@ export class Game {
   destroy(): void {
     cancelAnimationFrame(this.animationFrame);
     this.input.destroy();
+    this.audio.destroy();
   }
 
   beginRun(playerName: string): void {
+    this.audio.activate();
     this.playerName = playerName.trim() || 'PLAYER';
     this.menuOpen = false;
     this.resetRun();
@@ -105,6 +109,7 @@ export class Game {
     const difficulty = getDifficulty(difficultyScore);
     const fastestObstacleSpeed = Math.max(difficulty.debrisSpeed, difficulty.asteroidSpeed);
     this.background.update(deltaTime, fastestObstacleSpeed + 150);
+    this.audio.update(deltaTime, this.score, this.state === 'playing');
 
     if (this.state !== 'playing') {
       return;
@@ -116,7 +121,13 @@ export class Game {
       return;
     }
 
+    const previousDirection = { ...this.player.direction };
     const hitWall = this.player.update(deltaTime, this.input.getDirection(), difficultyScore);
+
+    if (previousDirection.x !== this.player.direction.x || previousDirection.y !== this.player.direction.y) {
+      this.audio.playTurn(this.player.direction, difficultyScore);
+    }
+
     this.emitFlame(deltaTime);
     this.spawnHazards(deltaTime, difficulty.debrisInterval, difficulty.debrisBurstMax, difficulty.debrisSpeed);
     this.spawnAsteroids(deltaTime, difficulty.asteroidInterval, difficulty.asteroidChance, difficulty.asteroidSpeed);
@@ -284,6 +295,7 @@ export class Game {
 
     this.starsCollected += 1;
     this.combo += 1;
+    this.audio.playStar(this.combo);
     this.addScore(100 + Math.min(250, this.combo * 15));
 
     if (this.state !== 'playing') {
@@ -328,11 +340,13 @@ export class Game {
   }
 
   private restoreLife(): void {
+    this.audio.playHeal();
     this.lives = Math.min(INITIAL_LIVES, this.lives + 1);
     this.addScore(50);
   }
 
   private loseLife(amount: number, resetPosition: boolean): void {
+    this.audio.playCrash(amount);
     this.lives -= amount;
     this.combo = 0;
 
@@ -386,6 +400,11 @@ export class Game {
     }
 
     this.runReported = true;
+    if (endedBy === 'end') {
+      this.audio.playEnd();
+    } else {
+      this.audio.playGameOver();
+    }
     this.options.onRunEnd?.({
       playerName: this.playerName,
       score: this.score,

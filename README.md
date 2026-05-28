@@ -12,12 +12,14 @@
 - 닉네임 입력 후 `START`
 - 순위 확인: `LEADERBOARD`
 - 일시정지: P 또는 Esc
+- 사운드: START 후 배경음악과 효과음이 재생됩니다.
 
 ## Rules
 
 - 별을 먹으면 기본 점수와 콤보 보너스를 얻습니다.
 - 생존 시간이 길어질수록 점수가 조금씩 오릅니다.
 - 점수가 오를수록 로켓과 장애물 이동 속도가 함께 빨라집니다.
+- 점수가 높아질수록 배경음악 BPM도 함께 올라가 속도감을 강화합니다.
 - 벽, 우주 쓰레기, 소행성에 닿으면 목숨 -1
 - 대각선 별똥별은 가장 빠른 장애물보다 더 빠르게 이동하며, 닿으면 목숨 -0.5
 - 반짝이는 대각선 별똥별을 먹으면 목숨 +1, 최대 3
@@ -42,6 +44,7 @@ npm run build
 - Vite
 - TypeScript
 - HTML Canvas
+- Web Audio API
 - CSS
 
 ## Files
@@ -51,6 +54,7 @@ npm run build
 - `docs/gameplay-screenshot.png`: 기획서에 사용한 실제 게임 화면
 - `public/docs`: 배포 URL에서 접근 가능한 기획서 정적 파일
 - `src/main.ts`: Canvas 생성과 게임 시작점
+- `src/game/audio`: 배경음악과 효과음 합성
 - `src/game/core`: 게임 루프, 입력, 충돌, 난이도, 공통 타입
 - `src/game/objects`: 로켓, 별, 우주 쓰레기, 소행성
 - `src/game/effects`: 배경, 별똥별, 불꽃 파티클
