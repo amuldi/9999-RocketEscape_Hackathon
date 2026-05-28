@@ -1,6 +1,11 @@
 import { circleIntersectsCircle, distance } from '../core/Collision';
 import { BOARD, type Vector } from '../core/types';
 
+export type StarSpawnBlocker = {
+  position: Vector;
+  radius: number;
+};
+
 export class Star {
   readonly radius = 12;
   position: Vector = { x: 0, y: 0 };
@@ -9,16 +14,26 @@ export class Star {
     this.respawn(playerPosition);
   }
 
-  respawn(playerPosition: Vector): void {
-    let candidate = this.randomPosition();
-    let attempts = 0;
+  respawn(playerPosition: Vector, blockers: StarSpawnBlocker[] = []): void {
+    let bestCandidate = this.randomPosition();
+    let bestScore = this.scoreCandidate(bestCandidate, playerPosition, blockers);
 
-    while (distance(candidate, playerPosition) < 88 && attempts < 40) {
-      candidate = this.randomPosition();
-      attempts += 1;
+    for (let attempts = 0; attempts < 90; attempts += 1) {
+      const candidate = this.randomPosition();
+      const candidateScore = this.scoreCandidate(candidate, playerPosition, blockers);
+
+      if (candidateScore > bestScore) {
+        bestCandidate = candidate;
+        bestScore = candidateScore;
+      }
+
+      if (candidateScore >= 1) {
+        this.position = candidate;
+        return;
+      }
     }
 
-    this.position = candidate;
+    this.position = bestCandidate;
   }
 
   isCollectedBy(playerPosition: Vector, playerRadius: number): boolean {
@@ -57,5 +72,15 @@ export class Star {
       x: BOARD.x + padding + Math.random() * (BOARD.width - padding * 2),
       y: BOARD.y + padding + Math.random() * (BOARD.height - padding * 2),
     };
+  }
+
+  private scoreCandidate(candidate: Vector, playerPosition: Vector, blockers: StarSpawnBlocker[]): number {
+    const playerClearance = distance(candidate, playerPosition) - 110;
+    const blockerClearance = blockers.reduce((minimumClearance, blocker) => {
+      const clearance = distance(candidate, blocker.position) - blocker.radius - this.radius - 26;
+      return Math.min(minimumClearance, clearance);
+    }, Number.POSITIVE_INFINITY);
+
+    return Math.min(playerClearance, blockerClearance);
   }
 }

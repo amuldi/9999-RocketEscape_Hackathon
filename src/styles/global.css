@@ -27,6 +27,7 @@ body {
 }
 
 #app {
+  position: relative;
   width: min(100vw, 720px);
   height: min(100vw, 720px);
   display: grid;
@@ -41,4 +42,146 @@ canvas {
   background: #000000;
   image-rendering: pixelated;
   outline: none;
+}
+
+.menu-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(0, 0, 0, 0.94);
+  color: #ffffff;
+}
+
+.menu-overlay.is-hidden {
+  display: none;
+}
+
+.menu-panel {
+  width: min(100%, 520px);
+  padding: 28px;
+  border: 2px solid #ffffff;
+  background: #000000;
+}
+
+.menu-panel h1,
+.menu-panel h2,
+.menu-panel p {
+  margin: 0;
+}
+
+.menu-panel h1 {
+  font-size: 34px;
+  line-height: 1.05;
+}
+
+.menu-copy {
+  margin-top: 14px;
+  color: #d7d7d7;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.field-label {
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.nickname-input,
+.mode-button,
+.start-button {
+  width: 100%;
+  border: 1px solid #ffffff;
+  border-radius: 0;
+  background: #000000;
+  color: #ffffff;
+  font: inherit;
+}
+
+.nickname-input {
+  height: 44px;
+  padding: 0 12px;
+  outline: none;
+}
+
+.nickname-input:focus,
+.mode-button:focus,
+.start-button:focus {
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+.mode-button,
+.start-button {
+  height: 44px;
+  margin-top: 12px;
+  cursor: pointer;
+}
+
+.mode-button.is-selected {
+  background: #ffffff;
+  color: #000000;
+}
+
+.start-button {
+  font-weight: 700;
+}
+
+.result-line {
+  min-height: 22px;
+  margin-top: 16px;
+  color: #f1f1f1;
+  font-size: 13px;
+}
+
+.menu-panel h2 {
+  margin-top: 18px;
+  font-size: 15px;
+}
+
+.ranking-list {
+  display: grid;
+  gap: 8px;
+  max-height: 174px;
+  margin: 10px 0 0;
+  padding-left: 24px;
+  overflow: auto;
+}
+
+.ranking-list li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  font-size: 14px;
+}
+
+.ranking-list strong {
+  font-size: 15px;
+}
+
+.ranking-list small {
+  grid-column: 1 / -1;
+  color: #a8a8a8;
+}
+
+.ranking-empty {
+  display: list-item;
+  color: #a8a8a8;
+}
+
+@media (max-width: 560px) {
+  .menu-overlay {
+    padding: 16px;
+  }
+
+  .menu-panel {
+    padding: 20px;
+  }
+
+  .menu-panel h1 {
+    font-size: 28px;
+  }
 }

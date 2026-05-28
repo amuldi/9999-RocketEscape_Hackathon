@@ -12,6 +12,16 @@ export const BOARD = {
 } as const;
 
 export type GameState = 'start' | 'playing' | 'paused' | 'gameOver' | 'end';
+export type GameMode = 'defense';
+
+export type RunResult = {
+  playerName: string;
+  mode: GameMode;
+  score: number;
+  starsCollected: number;
+  survivalSeconds: number;
+  endedBy: 'gameOver' | 'end';
+};
 
 export type Vector = {
   x: number;

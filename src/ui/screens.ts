@@ -3,11 +3,11 @@ import { BOARD, CANVAS_SIZE, TARGET_SCORE } from '../game/core/types';
 export function drawStartScreen(ctx: CanvasRenderingContext2D): void {
   drawOverlay(ctx);
   drawTitle(ctx, '9999: ROCKET ESCAPE', 218);
-  drawLine(ctx, 'ARROW KEYS / WASD  MOVE', 292, 18);
-  drawLine(ctx, 'EAT ONE STAR AT A TIME', 326, 18);
-  drawLine(ctx, 'AVOID WALLS, DEBRIS, ASTEROIDS', 360, 18);
-  drawLine(ctx, 'SPACE OR ENTER TO START', 428, 18);
-  drawLine(ctx, 'P OR ESC TO PAUSE', 462, 14);
+  drawLine(ctx, 'ENTER NICKNAME', 292, 18);
+  drawLine(ctx, 'SELECT DEFENSE MODE', 326, 18);
+  drawLine(ctx, 'LOCAL RANKING SAVES AFTER RUN', 360, 18);
+  drawLine(ctx, 'USE THE PANEL TO START', 428, 18);
+  drawLine(ctx, 'ARROW KEYS / WASD TO MOVE', 462, 14);
 }
 
 export function drawPauseScreen(ctx: CanvasRenderingContext2D): void {

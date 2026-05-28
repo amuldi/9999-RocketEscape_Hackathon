@@ -1,5 +1,6 @@
 import { Game } from './game/core/Game';
 import { CANVAS_SIZE } from './game/core/types';
+import { createGameMenu, type GameMenu } from './ui/Menu';
 import './styles/global.css';
 
 const app = document.querySelector<HTMLElement>('#app');
@@ -17,7 +18,13 @@ canvas.setAttribute('role', 'img');
 
 app.append(canvas);
 
-const game = new Game(canvas);
+let menu: GameMenu | undefined;
+const game = new Game(canvas, {
+  onRunEnd(result) {
+    menu?.showResult(result);
+  },
+});
+menu = createGameMenu(app, game);
 game.start();
 
 window.addEventListener('beforeunload', () => {

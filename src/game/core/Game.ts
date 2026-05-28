@@ -9,7 +9,11 @@ import { Player } from '../objects/Player';
 import { Star } from '../objects/Star';
 import { drawHUD } from '../../ui/HUD';
 import { drawEndScreen, drawGameOverScreen, drawPauseScreen, drawStartScreen } from '../../ui/screens';
-import { BOARD, CANVAS_SIZE, INITIAL_LIVES, TARGET_SCORE, type GameState } from './types';
+import { BOARD, CANVAS_SIZE, INITIAL_LIVES, TARGET_SCORE, type GameMode, type GameState, type RunResult } from './types';
+
+type GameOptions = {
+  onRunEnd?: (result: RunResult) => void;
+};
 
 export class Game {
   private readonly ctx: CanvasRenderingContext2D;
@@ -23,15 +27,26 @@ export class Game {
   private particles: Particle[] = [];
 
   private state: GameState = 'start';
+  private playerName = 'PLAYER';
+  private mode: GameMode = 'defense';
   private score = 0;
+  private starsCollected = 0;
+  private combo = 0;
+  private survivalSeconds = 0;
+  private survivalScoreCarry = 0;
   private lives = INITIAL_LIVES;
   private lastTime = 0;
   private animationFrame = 0;
   private debrisTimer = 0;
   private asteroidTimer = 0;
   private flameTimer = 0;
+  private menuOpen = true;
+  private runReported = false;
 
-  constructor(private readonly canvas: HTMLCanvasElement) {
+  constructor(
+    private readonly canvas: HTMLCanvasElement,
+    private readonly options: GameOptions = {},
+  ) {
     const context = canvas.getContext('2d');
 
     if (!context) {
@@ -52,6 +67,18 @@ export class Game {
     this.input.destroy();
   }
 
+  beginDefenseRun(playerName: string): void {
+    this.playerName = playerName.trim() || 'PLAYER';
+    this.mode = 'defense';
+    this.menuOpen = false;
+    this.resetRun();
+    this.state = 'playing';
+  }
+
+  setMenuOpen(isOpen: boolean): void {
+    this.menuOpen = isOpen;
+  }
+
   private readonly tick = (time: number): void => {
     const deltaTime = Math.min(0.033, (time - this.lastTime) / 1000);
     this.lastTime = time;
@@ -63,15 +90,21 @@ export class Game {
   };
 
   private update(deltaTime: number): void {
-    if (this.input.consumeStart()) {
-      this.handleStartAction();
+    if (this.menuOpen) {
+      this.input.consumeStart();
+      this.input.consumePause();
+    } else {
+      if (this.input.consumeStart()) {
+        this.handleStartAction();
+      }
+
+      if (this.input.consumePause()) {
+        this.handlePauseAction();
+      }
     }
 
-    if (this.input.consumePause()) {
-      this.handlePauseAction();
-    }
-
-    const difficulty = getDifficulty(this.score);
+    const difficultyScore = this.getDifficultyScore();
+    const difficulty = getDifficulty(difficultyScore);
     const fastestObstacleSpeed = Math.max(difficulty.debrisSpeed, difficulty.asteroidSpeed);
     this.background.update(deltaTime, fastestObstacleSpeed + 150);
 
@@ -79,7 +112,13 @@ export class Game {
       return;
     }
 
-    const hitWall = this.player.update(deltaTime, this.input.getDirection(), this.score);
+    this.addSurvivalScore(deltaTime);
+
+    if (this.state !== 'playing') {
+      return;
+    }
+
+    const hitWall = this.player.update(deltaTime, this.input.getDirection(), difficultyScore);
     this.emitFlame(deltaTime);
     this.spawnHazards(deltaTime, difficulty.debrisInterval, difficulty.debrisBurstMax, difficulty.debrisSpeed);
     this.spawnAsteroids(deltaTime, difficulty.asteroidInterval, difficulty.asteroidChance, difficulty.asteroidSpeed);
@@ -124,8 +163,6 @@ export class Game {
       particle.draw(this.ctx);
     }
 
-    this.star.draw(this.ctx);
-
     for (const obstacle of this.obstacles) {
       obstacle.draw(this.ctx);
     }
@@ -134,6 +171,7 @@ export class Game {
       asteroid.draw(this.ctx);
     }
 
+    this.star.draw(this.ctx);
     this.player.draw(this.ctx);
     this.ctx.restore();
 
@@ -141,7 +179,7 @@ export class Game {
     this.ctx.lineWidth = 2;
     this.ctx.strokeRect(BOARD.x, BOARD.y, BOARD.width, BOARD.height);
 
-    drawHUD(this.ctx, this.score, this.lives);
+    drawHUD(this.ctx, this.score, this.lives, this.playerName, this.combo);
 
     if (this.state === 'start') {
       drawStartScreen(this.ctx);
@@ -155,7 +193,11 @@ export class Game {
   }
 
   private handleStartAction(): void {
-    if (this.state === 'start' || this.state === 'gameOver' || this.state === 'end') {
+    if (this.state === 'start') {
+      return;
+    }
+
+    if (this.state === 'gameOver' || this.state === 'end') {
       this.resetRun();
       this.state = 'playing';
       return;
@@ -179,6 +221,10 @@ export class Game {
 
   private resetRun(): void {
     this.score = 0;
+    this.starsCollected = 0;
+    this.combo = 0;
+    this.survivalSeconds = 0;
+    this.survivalScoreCarry = 0;
     this.lives = INITIAL_LIVES;
     this.obstacles = [];
     this.asteroids = [];
@@ -186,6 +232,7 @@ export class Game {
     this.debrisTimer = 0;
     this.asteroidTimer = 0;
     this.flameTimer = 0;
+    this.runReported = false;
     this.player.reset();
     this.star = new Star(this.player.position);
   }
@@ -237,15 +284,24 @@ export class Game {
       return;
     }
 
-    this.score += 1;
+    this.starsCollected += 1;
+    this.combo += 1;
+    this.addScore(100 + Math.min(250, this.combo * 15));
 
-    if (this.score >= TARGET_SCORE) {
-      this.score = TARGET_SCORE;
-      this.state = 'end';
+    if (this.state !== 'playing') {
       return;
     }
 
-    this.star.respawn(this.player.position);
+    this.star.respawn(this.player.position, [
+      ...this.obstacles.map((obstacle) => ({
+        position: obstacle.position,
+        radius: Math.max(obstacle.width, obstacle.height) / 2,
+      })),
+      ...this.asteroids.map((asteroid) => ({
+        position: asteroid.position,
+        radius: asteroid.radius,
+      })),
+    ]);
   }
 
   private resolveCollisions(hitWall: boolean): void {
@@ -275,14 +331,16 @@ export class Game {
 
   private restoreLife(): void {
     this.lives = Math.min(INITIAL_LIVES, this.lives + 1);
+    this.addScore(50);
   }
 
   private loseLife(amount: number, resetPosition: boolean): void {
     this.lives -= amount;
+    this.combo = 0;
 
     if (this.lives <= 0) {
       this.lives = 0;
-      this.state = 'gameOver';
+      this.finishRun('gameOver');
       return;
     }
 
@@ -294,6 +352,50 @@ export class Game {
     }
 
     this.player.makeInvulnerable();
+  }
+
+  private addSurvivalScore(deltaTime: number): void {
+    this.survivalSeconds += deltaTime;
+    this.survivalScoreCarry += deltaTime * 5;
+
+    const earned = Math.floor(this.survivalScoreCarry);
+
+    if (earned <= 0) {
+      return;
+    }
+
+    this.survivalScoreCarry -= earned;
+    this.addScore(earned);
+  }
+
+  private addScore(points: number): void {
+    this.score = Math.min(TARGET_SCORE, this.score + points);
+
+    if (this.score >= TARGET_SCORE) {
+      this.finishRun('end');
+    }
+  }
+
+  private getDifficultyScore(): number {
+    return this.starsCollected + Math.floor(this.survivalSeconds / 8);
+  }
+
+  private finishRun(endedBy: 'gameOver' | 'end'): void {
+    this.state = endedBy;
+
+    if (this.runReported) {
+      return;
+    }
+
+    this.runReported = true;
+    this.options.onRunEnd?.({
+      playerName: this.playerName,
+      mode: this.mode,
+      score: this.score,
+      starsCollected: this.starsCollected,
+      survivalSeconds: this.survivalSeconds,
+      endedBy,
+    });
   }
 
   private configureCanvas(): void {
